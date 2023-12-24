@@ -1,12 +1,24 @@
 import TodoForm from "../components/Form/TodoForm";
 import TodoList from "../components/TodoList/TodoList";
-import TodoContext from "../components/store/todo-context";
+
 import Head from "next/head";
-import { Fragment, useContext } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 //1) add task 2) complete task 3) delete task 4) show the complete task
 const HomePage = () => {
-  const todoCtx = useContext(TodoContext);
+    const [todos, setTodos] = useState([]);
+
+    useEffect(() => {
+      const fetchTodos = async () => {
+        const response = await fetch("/api/get-todos");
+        const data = await response.json();
+        setTodos(data.todos);
+        console.log(data.todos)
+      };
+  
+      fetchTodos();
+  
+    }, []);
   return (
     <Fragment>
       <Head>
@@ -18,7 +30,7 @@ const HomePage = () => {
       </Head>
 
       <TodoForm />
-      <TodoList />
+      <TodoList todos={todos} />
     </Fragment>
   );
 };

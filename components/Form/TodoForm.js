@@ -1,20 +1,37 @@
-import { useContext, useRef } from "react";
+import { useRef } from "react";
 import classes from "./TodoForm.module.css";
-import TodoContext from "../store/todo-context";
 
-const TodoForm = (props) => {
+const TodoForm = () => {
   const titleRef = useRef();
-  const todoCtx = useContext(TodoContext);
 
-  const submitHandler = (event) => {
+  const submitHandler = async (event) => {
     event.preventDefault();
 
     const todoData = {
-      id: Math.random().toString(),
       title: titleRef.current.value,
     };
-    todoCtx.addTodo(todoData);
-    console.log(todoData, "data from component");
+    try {
+      const response = await fetch("/api/new-todo", {
+        method: "POST",
+        body: JSON.stringify(todoData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add todo.");
+      }
+
+      // You can handle success here if needed
+      const data = await response.json()
+      console.log(data)
+
+    } catch (error) {
+      console.error("Error adding todo:", error);
+    }
+
+    titleRef.current.value = "";
   };
   return (
     <section className={classes.sec}>

@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 const CompletedTaskPage = () => {
   const router = useRouter();
   const { todos } = router.query;
+  console.log("from completed page",todos)
   return (
     <Fragment>
       <Head>

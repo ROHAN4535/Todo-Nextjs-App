@@ -2,7 +2,7 @@ import { useContext } from "react";
 import TodoContext from "../store/todo-context";
 import classes from "./TodoList.module.css";
 
-const TodoList = ({ todosFilter }) => {
+const TodoList = ({ todos, todosFilter }) => {
   const todoCtx = useContext(TodoContext);
   // const searchParams = useSearchParams();
   // const todosFilter = searchParams.get("todos");
@@ -13,41 +13,36 @@ const TodoList = ({ todosFilter }) => {
   // }
 
   const filterTodos =
-    todosFilter === "completed" ? todoCtx.completedTodos : todoCtx.todos;
+  todosFilter === "completed" ? todoCtx.completedTodos : todos;
 
   return (
     <ul className={classes.list}>
-      {filterTodos.map((todo) => (
-        <li key={todo.id}>
-          {/* <input
-            type="checkbox"
-            id={`todo-${todo.id}`}
-            onChange={() => todoCtx.completeTodo(todo.id)}
-            checked={todo.completed}
-          /> */}
-          {todosFilter !== "completed" && (
-            <div
-              className={`${classes["circle-icon"]} ${
-                todo.completed ? classes.completed : ""
-              }`}
-              onClick={() => todoCtx.completeTodo(todo.id)}
-            />
-          )}
-
-          <label
-            htmlFor={`todo-${todo.id}`}
-            className={todo.completed ? classes.completed : ""}
-          >
-            {todo.title}
-          </label>
-          <button
-            className={classes.btn}
-            onClick={() => todoCtx.removeTodo(todo.id)}
-          >
-            Remove Task
-          </button>
-        </li>
-      ))}
+      {console.log(filterTodos)}
+      {filterTodos &&
+        filterTodos.map((todo) => (
+          <li key={todo.id}>
+            {todosFilter !== "completed" && (
+              <div
+                className={`${classes["circle-icon"]} ${
+                  todo.completed ? classes.completed : ""
+                }`}
+                onClick={() => todoCtx.completeTodo(todo.id)}
+              />
+            )}
+            <label
+              htmlFor={`todo-${todo.id}`}
+              className={todo.completed ? classes.completed : ""}
+            >
+              {todo.title}
+            </label>
+            <button
+              className={classes.btn}
+              onClick={() => todoCtx.removeTodo(todo.id)}
+            >
+              Remove Task
+            </button>
+          </li>
+        ))}
     </ul>
   );
 };
