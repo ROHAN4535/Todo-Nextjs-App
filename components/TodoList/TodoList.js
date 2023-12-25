@@ -1,9 +1,7 @@
-import { useContext } from "react";
-import TodoContext from "../store/todo-context";
+import { useEffect, useState } from "react";
 import classes from "./TodoList.module.css";
 
-const TodoList = ({ todos, todosFilter }) => {
-  const todoCtx = useContext(TodoContext);
+const TodoList = () => {
   // const searchParams = useSearchParams();
   // const todosFilter = searchParams.get("todos");
 
@@ -11,38 +9,67 @@ const TodoList = ({ todos, todosFilter }) => {
   // if (todosFilter === "completed") {
   //   filterTodos = filterTodos.filter((todo) => todo.completed);
   // }
+  const [todos, setTodos] = useState([]);
 
-  const filterTodos =
-  todosFilter === "completed" ? todoCtx.completedTodos : todos;
+  useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        const response = await fetch("/api/get-todos");
+        if (!response.ok) {
+          throw new Error("Failed to fetch todos.");
+        }
+
+        const data = await response.json();
+        setTodos(data.todos);
+      } catch (error) {
+        console.error("Error fetching todos:", error);
+      }
+    };
+
+    fetchTodos();
+  }, []);
+
+  const completedTodo = async (id) => {
+    console.log("Completing Todo ID:", id);
+    try {
+      const response = await fetch(`/api/complete-todo/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: "completed" }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update todo status.");
+      }
+
+      setTodos((prevTodos) =>
+        prevTodos.map((todo) =>
+          todo._id === id ? { ...todo, status: "completed" } : todo
+        )
+      );
+    } catch (err) {
+      console.log("Error updating todo status:", err);
+    }
+  };
 
   return (
     <ul className={classes.list}>
-      {console.log(filterTodos)}
-      {filterTodos &&
-        filterTodos.map((todo) => (
-          <li key={todo.id}>
-            {todosFilter !== "completed" && (
-              <div
-                className={`${classes["circle-icon"]} ${
-                  todo.completed ? classes.completed : ""
-                }`}
-                onClick={() => todoCtx.completeTodo(todo.id)}
-              />
-            )}
-            <label
-              htmlFor={`todo-${todo.id}`}
-              className={todo.completed ? classes.completed : ""}
-            >
-              {todo.title}
-            </label>
-            <button
-              className={classes.btn}
-              onClick={() => todoCtx.removeTodo(todo.id)}
-            >
-              Remove Task
-            </button>
-          </li>
-        ))}
+      {console.log(todos)}
+      {todos.map((todo) => (
+        <li key={todo._id}>
+          <div
+            className={`${classes["circle-icon"]} ${
+              todo.status === "completed" ? classes.completed : ""
+            }`}
+            onClick={() => {
+              completedTodo(todo._id);
+            }}
+          />
+          <label htmlFor={`todo-${todo._id}`}>{todo.title}</label>
+          <button className={classes.btn}>Remove Task</button>
+        </li>
+      ))}
     </ul>
   );
 };
