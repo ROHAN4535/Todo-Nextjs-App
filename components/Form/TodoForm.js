@@ -9,6 +9,7 @@ const TodoForm = () => {
 
     const todoData = {
       title: titleRef.current.value,
+      status: 'incomplete'
     };
     try {
       const response = await fetch("/api/new-todo", {
@@ -25,7 +26,7 @@ const TodoForm = () => {
 
       // You can handle success here if needed
       const data = await response.json()
-      console.log(data)
+      console.log(data.todo)
 
     } catch (error) {
       console.error("Error adding todo:", error);
