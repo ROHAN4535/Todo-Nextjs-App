@@ -53,9 +53,18 @@ const TodoList = () => {
     }
   };
 
+  const deleteHandler = async (id) => {
+    const res = await fetch(`/api/delete-todo/${id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      throw new Error("Failed to delete todo.");
+    }
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo._id !== id));
+  };
+
   return (
     <ul className={classes.list}>
-      {console.log(todos)}
       {todos.map((todo) => (
         <li key={todo._id}>
           <div
@@ -67,7 +76,14 @@ const TodoList = () => {
             }}
           />
           <label htmlFor={`todo-${todo._id}`}>{todo.title}</label>
-          <button className={classes.btn}>Remove Task</button>
+          <button
+            className={classes.btn}
+            onClick={() => {
+              deleteHandler(todo._id);
+            }}
+          >
+            Remove Task
+          </button>
         </li>
       ))}
     </ul>
