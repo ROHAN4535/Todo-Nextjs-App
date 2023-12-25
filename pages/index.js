@@ -29,7 +29,7 @@ const HomePage = () => {
       </Head>
 
       <TodoForm />
-      <TodoList />
+      <TodoList filterStatus="incomplete"  />
     </Fragment>
   );
 };

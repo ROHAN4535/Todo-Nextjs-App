@@ -3,14 +3,21 @@ import TodoContext from "./todo-context";
 
 const TodoProvider = (props) => {
   const [todos, setTodos] = useState([]);
-  const [completedTodos, setCompletedTodos] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = async () => {
+    try {
       const response = await fetch("/api/get-todos");
-      const data = response.json();
-      setTodos(data.result);
-    };
+      if (!response.ok) {
+        throw new Error("Failed to fetch todos.");
+      }
+
+      const data = await response.json();
+      setTodos(data.todos);
+    } catch (error) {
+      console.error("Error fetching todos:", error);
+    }
+  };
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -25,54 +32,52 @@ const TodoProvider = (props) => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error("Failed to add todo.");
       }
 
       const data = await response.json();
-      console.log(data);
-      const newTodo = {
-        ...todoData,
-        id: data.todo.insertedId,
-        completed: false,
-      };
-      console.log(newTodo);
-      setTodos((prevTodos) => [...prevTodos, newTodo]);
-    } catch (err) {
-      console.log("error adding todo", err);
+      setTodos((prevTodos) => [...prevTodos, todoData]);
+
+    } catch (error) {
+      console.error("Error adding todo:", error);
     }
   };
-  
+
   const removeTodoHandler = async (id) => {
+    const res = await fetch(`/api/delete-todo/${id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      throw new Error("Failed to delete todo.");
+    }
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo._id !== id));
+  };
+
+  const completeTodoHandler = async (id) => {
     try {
-      console.log(id);
-      await fetch("/api/delete-todo", {
-        method: "DELETE",
-        body: JSON.stringify({ id: id.toString() }),
+      const response = await fetch(`/api/complete-todo/${id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ status: "completed" }),
       });
+      if (!response.ok) {
+        throw new Error("Failed to update todo status.");
+      }
 
-      // Update local state after successful removal
-      setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
-      setCompletedTodos((prevCompleted) =>
-        prevCompleted.filter((todo) => todo.id !== id)
+      setTodos((prevTodos) =>
+        prevTodos.map((todo) =>
+          todo._id === id ? { ...todo, status: "completed" } : todo
+        )
       );
     } catch (err) {
-      console.log("error removing todo", err);
+      console.log("Error updating todo status:", err);
     }
-  };
-
-  const completeTodoHandler = (id) => {
-    const completedTodo = todos.find((todo) => todo.id === id);
-    setCompletedTodos((prevCompleted) => [...prevCompleted, completedTodo]);
-    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
-    console.log("completed");
   };
 
   const contextValue = {
     todos: todos,
-    completedTodos: completedTodos,
     addTodo: addTodoHandler,
     removeTodo: removeTodoHandler,
     completeTodo: completeTodoHandler,

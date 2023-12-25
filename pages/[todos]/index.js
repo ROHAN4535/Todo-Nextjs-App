@@ -12,9 +12,8 @@ const CompletedTaskPage = () => {
         <title>Completed Tasks</title>
         <meta name="description" content="View your completed tasks." />
       </Head>
-      <TodoList />
+      <TodoList filterStatus = 'completed'/>
     </Fragment>
   );
 };
-
 export default CompletedTaskPage;
